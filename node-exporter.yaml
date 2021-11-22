@@ -1,5 +1,5 @@
 ---
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: DaemonSet
 metadata:
   name: node-exporter
@@ -7,6 +7,9 @@ metadata:
   labels:
     k8s-app: node-exporter
 spec:
+  selector:
+    matchLabels:
+      k8s-app: node-exporter
   template:
     metadata:
       labels:
@@ -19,10 +22,19 @@ spec:
         - containerPort: 9100
           protocol: TCP
           name: http
+      tolerations:
+      hostNetwork: true
+      hostPID: true
+      hostIPC: true
+      restartPolicy: Always
 ---
 apiVersion: v1
 kind: Service
 metadata:
+  annotations:
+    prometheus.io/scrape: 'true'
+    prometheus.io/app-metrics: 'true'
+    prometheus.io/app-metrics-path: '/metrics'
   labels:
     k8s-app: node-exporter
   name: node-exporter
